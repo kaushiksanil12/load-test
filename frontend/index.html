@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataHub — Dashboard</title>
+  <meta name="description" content="A containerized full-stack dashboard showing real-time data from PostgreSQL via a Node.js REST API." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated background blobs -->
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">DataHub</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" id="nav-overview" onclick="switchTab('overview')">
+        <span class="nav-icon">◈</span> Overview
+      </button>
+      <button class="nav-item" id="nav-employees" onclick="switchTab('employees')">
+        <span class="nav-icon">◉</span> Employees
+      </button>
+      <button class="nav-item" id="nav-products" onclick="switchTab('products')">
+        <span class="nav-icon">◆</span> Products
+      </button>
+      <button class="nav-item" id="nav-orders" onclick="switchTab('orders')">
+        <span class="nav-icon">◑</span> Orders
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="db-status" id="db-status">
+        <span class="status-dot pulsing" id="status-dot"></span>
+        <span id="status-text">Connecting…</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+
+    <!-- Header -->
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <h1 class="page-title" id="page-title">Overview</h1>
+        <span class="page-sub">Real-time data from PostgreSQL</span>
+      </div>
+      <div class="top-bar-right">
+        <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">
+          <span id="refresh-icon">↻</span> Refresh
+        </button>
+        <div class="avatar">KD</div>
+      </div>
+    </header>
+
+    <!-- ─── OVERVIEW TAB ─────────────────────────────────────────────────── -->
+    <section class="tab-content active" id="tab-overview">
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card" id="card-employees">
+          <div class="stat-header">
+            <span class="stat-label">Active Employees</span>
+            <span class="stat-badge badge-blue">↑ live</span>
+          </div>
+          <div class="stat-value" id="stat-employees">—</div>
+          <div class="stat-meta">Across all departments</div>
+        </div>
+
+        <div class="stat-card" id="card-products">
+          <div class="stat-header">
+            <span class="stat-label">Products</span>
+            <span class="stat-badge badge-purple">catalog</span>
+          </div>
+          <div class="stat-value" id="stat-products">—</div>
+          <div class="stat-meta">In inventory</div>
+        </div>
+
+        <div class="stat-card" id="card-orders">
+          <div class="stat-header">
+            <span class="stat-label">Total Orders</span>
+            <span class="stat-badge badge-teal">fulfilled</span>
+          </div>
+          <div class="stat-value" id="stat-orders">—</div>
+          <div class="stat-meta">All time</div>
+        </div>
+
+        <div class="stat-card" id="card-revenue">
+          <div class="stat-header">
+            <span class="stat-label">Revenue</span>
+            <span class="stat-badge badge-orange">$</span>
+          </div>
+          <div class="stat-value" id="stat-revenue">—</div>
+          <div class="stat-meta">Total order value</div>
+        </div>
+      </div>
+
+      <!-- Department breakdown + recent orders -->
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Department Breakdown</h2>
+          </div>
+          <div class="dept-list" id="dept-list">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Orders</h2>
+          </div>
+          <div class="recent-orders" id="recent-orders">
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+            <div class="skeleton-row"></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ─── EMPLOYEES TAB ────────────────────────────────────────────────── -->
+    <section class="tab-content" id="tab-employees">
+      <div class="card full-card">
+        <div class="card-header">
+          <h2 class="card-title">All Employees</h2>
+          <input class="search-box" id="emp-search" placeholder="Search name or department…" oninput="filterTable('emp-table', this.value)" />
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="emp-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Name</th><th>Department</th><th>Role</th>
+                <th>Salary</th><th>Joined</th><th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="emp-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── PRODUCTS TAB ─────────────────────────────────────────────────── -->
+    <section class="tab-content" id="tab-products">
+      <div class="card full-card">
+        <div class="card-header">
+          <h2 class="card-title">Product Inventory</h2>
+          <input class="search-box" id="prod-search" placeholder="Search products…" oninput="filterTable('prod-table', this.value)" />
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="prod-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Product</th><th>Category</th>
+                <th>Price</th><th>Stock</th><th>Added</th>
+              </tr>
+            </thead>
+            <tbody id="prod-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── ORDERS TAB ───────────────────────────────────────────────────── -->
+    <section class="tab-content" id="tab-orders">
+      <div class="card full-card">
+        <div class="card-header">
+          <h2 class="card-title">Order History</h2>
+          <input class="search-box" id="ord-search" placeholder="Search orders…" oninput="filterTable('ord-table', this.value)" />
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="ord-table">
+            <thead>
+              <tr>
+                <th>#</th><th>Employee</th><th>Product</th><th>Category</th>
+                <th>Qty</th><th>Total</th><th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="ord-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
