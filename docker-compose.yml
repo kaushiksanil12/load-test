@@ -46,6 +46,8 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend
     restart: unless-stopped
+    environment:
+      TEMPO_URL: http://51.20.93.118:4318/v1/traces
     networks:
       - app_network
 
