@@ -6,19 +6,20 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
-const provider = new WebTracerProvider({
-  resource: resourceFromAttributes({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'boostr-frontend',
-  }),
-});
-
 const exporter = new OTLPTraceExporter({
   url: typeof process !== 'undefined' && process.env.TEMPO_URL 
     ? process.env.TEMPO_URL 
     : 'http://51.20.93.118:4318/v1/traces',
 });
 
-provider.addSpanProcessor(new BatchSpanProcessor(exporter));
+const provider = new WebTracerProvider({
+  resource: resourceFromAttributes({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'boostr-frontend',
+  }),
+  spanProcessors: [
+    new BatchSpanProcessor(exporter)
+  ]
+});
 provider.register();
 
 registerInstrumentations({
