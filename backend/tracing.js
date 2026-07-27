@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config();
+
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc');
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
@@ -11,7 +13,7 @@ const sdk = new NodeSDK({
     [SemanticResourceAttributes.SERVICE_NAME]: 'boostr-backend',
   }),
   traceExporter: new OTLPTraceExporter({
-    url: 'http://51.20.93.118:4317'
+    url: process.env.TEMPO_URL || 'http://51.20.93.118:4317'
   }),
   instrumentations: [
     getNodeAutoInstrumentations({

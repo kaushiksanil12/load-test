@@ -13,7 +13,9 @@ const provider = new WebTracerProvider({
 });
 
 const exporter = new OTLPTraceExporter({
-  url: 'http://51.20.93.118:4318/v1/traces',
+  url: typeof process !== 'undefined' && process.env.TEMPO_URL 
+    ? process.env.TEMPO_URL 
+    : 'http://51.20.93.118:4318/v1/traces',
 });
 
 provider.addSpanProcessor(new BatchSpanProcessor(exporter));
