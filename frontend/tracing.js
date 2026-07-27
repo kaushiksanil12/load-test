@@ -7,9 +7,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 
 const exporter = new OTLPTraceExporter({
-  url: typeof process !== 'undefined' && process.env.TEMPO_URL 
-    ? process.env.TEMPO_URL 
-    : 'http://51.20.93.118:4318/v1/traces',
+  url: 'TEMPO_URL_PLACEHOLDER',
 });
 
 const provider = new WebTracerProvider({
