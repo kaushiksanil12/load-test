@@ -43,6 +43,7 @@ services:
       OTEL_TRACES_SAMPLER_ARG: endpoint=http://host.docker.internal:2000
       OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://host.docker.internal:4316/v1/metrics
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://host.docker.internal:4316/v1/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://host.docker.internal:4316
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-backend
     depends_on:
       postgres:
