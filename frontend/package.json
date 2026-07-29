@@ -3,24 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "build": "esbuild tracing.js --bundle --outfile=tracing-bundle.js --minify"
-  },
+  "scripts": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
-  "dependencies": {
-    "@opentelemetry/api": "^1.9.1",
-    "@opentelemetry/auto-instrumentations-web": "^0.66.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.221.0",
-    "@opentelemetry/instrumentation": "^0.221.0",
-    "@opentelemetry/resources": "^2.10.0",
-    "@opentelemetry/sdk-trace-base": "^2.10.0",
-    "@opentelemetry/sdk-trace-web": "^2.10.0",
-    "@opentelemetry/semantic-conventions": "^1.43.0"
-  },
-  "devDependencies": {
-    "esbuild": "^0.28.1"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

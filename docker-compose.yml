@@ -33,7 +33,6 @@ services:
       DB_USER: appuser
       DB_PASSWORD: apppassword
       PORT: 3000
-      TEMPO_URL: http://51.20.93.118:4317
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,8 +45,6 @@ services:
       dockerfile: Dockerfile
     container_name: react_frontend
     restart: unless-stopped
-    environment:
-      TEMPO_URL: http://51.20.93.118:4318/v1/traces
     networks:
       - app_network
 
