@@ -26,6 +26,8 @@ services:
       dockerfile: Dockerfile
     container_name: node_backend
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
@@ -33,6 +35,15 @@ services:
       DB_USER: appuser
       DB_PASSWORD: apppassword
       PORT: 3000
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_SAMPLER: xray
+      OTEL_TRACES_SAMPLER_ARG: endpoint=http://host.docker.internal:2000
+      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://host.docker.internal:4316/v1/metrics
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://host.docker.internal:4316/v1/traces
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-backend
     depends_on:
       postgres:
         condition: service_healthy
