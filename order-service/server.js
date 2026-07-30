@@ -91,16 +91,16 @@ app.get("/api/heavy", (req, res) => {
 // ── Create Random Order (For simulating writes) ──────────────────────────────
 app.post("/api/orders", async (req, res) => {
   try {
-    // 1. Fetch random employee from employee-service
-    const empRes = await axios.get("http://employee-service:3000/api/employees");
+    // 1. Fetch random employee from employee-service (via API Gateway)
+    const empRes = await axios.get("http://nginx/api/employees");
     const employees = empRes.data;
     const activeEmployees = employees.filter(e => e.status === 'active');
     if (activeEmployees.length === 0) return res.status(400).json({ error: "No active employees found" });
     const randomEmp = activeEmployees[Math.floor(Math.random() * activeEmployees.length)];
     const employeeId = randomEmp.id;
 
-    // 2. Fetch random product from product-service
-    const prodResHTTP = await axios.get("http://product-service:3002/api/products/random");
+    // 2. Fetch random product from product-service (via API Gateway)
+    const prodResHTTP = await axios.get("http://nginx/api/products/random");
     const product = prodResHTTP.data;
     const productId = product.id;
     const price = parseFloat(product.price);
@@ -115,9 +115,9 @@ app.post("/api/orders", async (req, res) => {
     );
     const order = insertRes.rows[0];
 
-    // 4. Send notification via notification-service
+    // 4. Send notification via notification-service (via API Gateway)
     try {
-      await axios.post("http://notification-service:3003/api/notifications", {
+      await axios.post("http://nginx/api/notifications", {
         orderId: order.id,
         employeeId: employeeId,
         totalAmount: totalAmount
