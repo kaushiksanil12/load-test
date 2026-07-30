@@ -327,7 +327,8 @@ async function deleteEmployee(id) {
 // ── Attach to global window for ESBuild bundler ─────────────────────────
 window.switchTab = switchTab;
 window.filterTable = filterTable;
-window.refreshDashboard = refreshDashboard;
+window.refreshData = refreshData;
+window.refreshDashboard = refreshData;   // alias — HTML uses this name
 window.placeRandomOrder = placeRandomOrder;
 window.generateHeavyLoad = generateHeavyLoad;
 window.openAddEmployeeModal = openAddEmployeeModal;
