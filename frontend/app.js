@@ -8,7 +8,7 @@ try {
     telemetries: ["performance", "errors", "http"],
     allowCookies: true,
     enableXRay: false,
-    signing: true
+    signing: false   // Public resource policy — no Cognito needed
   };
 
   const APPLICATION_ID = "f9d49313-e403-433d-9c24-186bedca6477";
