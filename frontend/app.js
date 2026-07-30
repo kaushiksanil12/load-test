@@ -149,6 +149,11 @@ function renderEmployees(rows) {
       <td>$${parseInt(e.salary).toLocaleString()}</td>
       <td>${fmtDate(e.joined_at)}</td>
       <td><span class="chip ${e.status === 'active' ? 'chip-active' : 'chip-inactive'}">${e.status}</span></td>
+      <td>
+        <button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="deleteEmployee(${e.id})">
+          Delete
+        </button>
+      </td>
     </tr>`).join("");
 }
 
@@ -240,5 +245,59 @@ async function generateHeavyLoad() {
     showToast(`CPU spike completed in ${data.time_ms}ms (counted to ${data.count}).`);
   } catch (e) {
     showToast(`Failed to generate load: ${e.message}`, "error");
+  }
+}
+
+/* ─── Employee CRUD Actions ─────────────────────────────────────────────── */
+function openAddEmployeeModal() {
+  document.getElementById("employee-modal").classList.remove("hidden");
+}
+
+function closeAddEmployeeModal() {
+  document.getElementById("employee-modal").classList.add("hidden");
+  document.getElementById("add-employee-form").reset();
+}
+
+async function submitNewEmployee(e) {
+  e.preventDefault();
+  const btn = document.getElementById("emp-submit-btn");
+  btn.textContent = "Saving...";
+  btn.disabled = true;
+
+  const payload = {
+    name: document.getElementById("emp-name").value,
+    department: document.getElementById("emp-dept").value,
+    role: document.getElementById("emp-role").value,
+    salary: document.getElementById("emp-salary").value
+  };
+
+  try {
+    await apiFetch("/employees", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    showToast(`Employee ${payload.name} added successfully!`, "success");
+    closeAddEmployeeModal();
+    allEmployees = []; // force reload
+    loadEmployees();
+  } catch (err) {
+    showToast(`Failed to add employee: ${err.message}`, "error");
+  } finally {
+    btn.textContent = "Save Employee";
+    btn.disabled = false;
+  }
+}
+
+async function deleteEmployee(id) {
+  if (!confirm("Are you sure you want to delete this employee?")) return;
+  try {
+    showToast("Deleting employee...", "info");
+    await apiFetch(`/employees/${id}`, { method: "DELETE" });
+    showToast("Employee deleted successfully!", "success");
+    allEmployees = []; // force reload
+    loadEmployees();
+  } catch (err) {
+    showToast(`Failed to delete employee: ${err.message}`, "error");
   }
 }

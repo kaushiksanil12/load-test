@@ -61,6 +61,37 @@ app.get("/api/employees", async (req, res) => {
   }
 });
 
+// ── Create Employee ──────────────────────────────────────────────────────────
+app.post("/api/employees", async (req, res) => {
+  try {
+    const { name, department, role, salary } = req.body;
+    if (!name || !department || !role || !salary) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    const { rows } = await pool.query(
+      "INSERT INTO employees (name, department, role, salary) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, department, role, parseFloat(salary)]
+    );
+    res.json({ status: "success", employee: rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Delete Employee ──────────────────────────────────────────────────────────
+app.delete("/api/employees/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rowCount } = await pool.query("DELETE FROM employees WHERE id = $1", [id]);
+    if (rowCount === 0) {
+      return res.status(404).json({ error: "Employee not found" });
+    }
+    res.json({ status: "success" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Products ─────────────────────────────────────────────────────────────────
 app.get("/api/products", async (req, res) => {
   try {

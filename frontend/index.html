@@ -152,7 +152,12 @@
     <section class="tab-content" id="tab-employees">
       <div class="card full-card">
         <div class="card-header">
-          <h2 class="card-title">All Employees</h2>
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <h2 class="card-title">All Employees</h2>
+            <button class="btn btn-primary" onclick="openAddEmployeeModal()">
+              <span class="btn-icon">+</span> Add Employee
+            </button>
+          </div>
           <input class="search-box" id="emp-search" placeholder="Search name or department…" oninput="filterTable('emp-table', this.value)" />
         </div>
         <div class="table-wrap">
@@ -160,7 +165,7 @@
             <thead>
               <tr>
                 <th>#</th><th>Name</th><th>Department</th><th>Role</th>
-                <th>Salary</th><th>Joined</th><th>Status</th>
+                <th>Salary</th><th>Joined</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody id="emp-body"></tbody>
@@ -212,6 +217,38 @@
     </section>
 
   </main>
+
+  <!-- Add Employee Modal -->
+  <div class="modal-overlay hidden" id="employee-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Add New Employee</h2>
+        <button class="modal-close" onclick="closeAddEmployeeModal()">×</button>
+      </div>
+      <form class="modal-body" id="add-employee-form" onsubmit="submitNewEmployee(event)">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="emp-name" required placeholder="e.g. Jane Doe" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <input type="text" class="form-input" id="emp-dept" required placeholder="e.g. Engineering" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role</label>
+          <input type="text" class="form-input" id="emp-role" required placeholder="e.g. Senior Developer" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Salary</label>
+          <input type="number" class="form-input" id="emp-salary" required placeholder="e.g. 120000" min="0" />
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeAddEmployeeModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="emp-submit-btn">Save Employee</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
