@@ -44,6 +44,7 @@ services:
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-backend
     depends_on:
       postgres:
