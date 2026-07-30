@@ -1,6 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
+const axios = require("axios");
 
 const app = express();
 app.use(cors());
@@ -91,18 +92,16 @@ app.get("/api/heavy", (req, res) => {
 app.post("/api/orders", async (req, res) => {
   try {
     // 1. Fetch random employee from employee-service
-    const empResHTTP = await fetch("http://employee-service:3000/api/employees");
-    if (!empResHTTP.ok) throw new Error("Failed to fetch employees from employee-service");
-    const employees = await empResHTTP.json();
+    const empRes = await axios.get("http://employee-service:3000/api/employees");
+    const employees = empRes.data;
     const activeEmployees = employees.filter(e => e.status === 'active');
     if (activeEmployees.length === 0) return res.status(400).json({ error: "No active employees found" });
     const randomEmp = activeEmployees[Math.floor(Math.random() * activeEmployees.length)];
     const employeeId = randomEmp.id;
 
     // 2. Fetch random product from product-service
-    const prodResHTTP = await fetch("http://product-service:3002/api/products/random");
-    if (!prodResHTTP.ok) throw new Error("Failed to fetch product from product-service");
-    const product = await prodResHTTP.json();
+    const prodResHTTP = await axios.get("http://product-service:3002/api/products/random");
+    const product = prodResHTTP.data;
     const productId = product.id;
     const price = parseFloat(product.price);
 
@@ -118,14 +117,10 @@ app.post("/api/orders", async (req, res) => {
 
     // 4. Send notification via notification-service
     try {
-      await fetch("http://notification-service:3003/api/notifications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          orderId: order.id,
-          employeeId: employeeId,
-          totalAmount: totalAmount
-        })
+      await axios.post("http://notification-service:3003/api/notifications", {
+        orderId: order.id,
+        employeeId: employeeId,
+        totalAmount: totalAmount
       });
     } catch (notifErr) {
       console.warn("Failed to send notification, but order succeeded", notifErr);
