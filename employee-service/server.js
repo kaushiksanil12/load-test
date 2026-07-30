@@ -49,6 +49,18 @@ app.get("/api/stats", async (req, res) => {
   }
 });
 
+// ── Departments ──────────────────────────────────────────────────────────────
+app.get("/api/departments", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT department, COUNT(*) as count FROM employees WHERE status = 'active' GROUP BY department ORDER BY count DESC"
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Employees ────────────────────────────────────────────────────────────────
 app.get("/api/employees", async (req, res) => {
   try {
