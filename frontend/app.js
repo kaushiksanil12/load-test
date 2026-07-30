@@ -55,9 +55,9 @@ function refreshData() {
 }
 
 /* ─── Fetch helpers ─────────────────────────────────────────────────────── */
-async function apiFetch(path) {
-  const res = await fetch(`${API}${path}`);
-  if (!res.ok) throw new Error(`${res.status}`);
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API}${path}`, options);
+  if (!res.ok) throw new Error(`${res.status} - ${res.statusText}`);
   return res.json();
 }
 
@@ -210,4 +210,35 @@ function filterTable(tableId, query) {
 function fmtDate(iso) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" });
+}
+
+/* ─── Load Simulation Actions ───────────────────────────────────────────── */
+function showToast(msg, type = 'success') {
+  const toast = document.getElementById("action-toast");
+  toast.textContent = msg;
+  toast.className = `toast ${type}`;
+  toast.style.color = type === 'error' ? 'var(--accent2)' : 'var(--accent1)';
+  setTimeout(() => toast.classList.add("hidden"), 4000);
+}
+
+async function placeRandomOrder() {
+  try {
+    showToast("Placing order...", "info");
+    const data = await apiFetch("/orders", { method: "POST" });
+    showToast(`Order #${data.order.id} placed successfully for $${data.order.total_amount}!`);
+    allOrders = []; // clear cache
+    refreshData();
+  } catch (e) {
+    showToast(`Failed to place order: ${e.message}`, "error");
+  }
+}
+
+async function generateHeavyLoad() {
+  try {
+    showToast("Simulating CPU spike...", "info");
+    const data = await apiFetch("/heavy");
+    showToast(`CPU spike completed in ${data.time_ms}ms (counted to ${data.count}).`);
+  } catch (e) {
+    showToast(`Failed to generate load: ${e.message}`, "error");
+  }
 }

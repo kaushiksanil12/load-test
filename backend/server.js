@@ -111,6 +111,44 @@ app.get("/api/departments", async (req, res) => {
   }
 });
 
+// ── Heavy CPU Load (For tracing/testing) ─────────────────────────────────────
+app.get("/api/heavy", (req, res) => {
+  const start = Date.now();
+  let count = 0;
+  // Simulate heavy computation (busy wait)
+  for (let i = 0; i < 500000000; i++) {
+    count++;
+  }
+  const duration = Date.now() - start;
+  res.json({ status: "success", count, time_ms: duration });
+});
+
+// ── Create Random Order (For simulating writes) ──────────────────────────────
+app.post("/api/orders", async (req, res) => {
+  try {
+    const empRes = await pool.query("SELECT id FROM employees WHERE status = 'active' ORDER BY RANDOM() LIMIT 1");
+    if (empRes.rows.length === 0) return res.status(400).json({ error: "No active employees found" });
+    const employeeId = empRes.rows[0].id;
+
+    const prodRes = await pool.query("SELECT id, price FROM products ORDER BY RANDOM() LIMIT 1");
+    if (prodRes.rows.length === 0) return res.status(400).json({ error: "No products found" });
+    const productId = prodRes.rows[0].id;
+    const price = parseFloat(prodRes.rows[0].price);
+
+    const quantity = Math.floor(Math.random() * 5) + 1;
+    const totalAmount = (price * quantity).toFixed(2);
+
+    const insertRes = await pool.query(
+      "INSERT INTO orders (employee_id, product_id, quantity, total_amount) VALUES ($1, $2, $3, $4) RETURNING *",
+      [employeeId, productId, quantity, totalAmount]
+    );
+
+    res.json({ status: "success", order: insertRes.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Backend running on port ${PORT}`);

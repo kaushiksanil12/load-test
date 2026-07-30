@@ -66,6 +66,22 @@
     <!-- ─── OVERVIEW TAB ─────────────────────────────────────────────────── -->
     <section class="tab-content active" id="tab-overview">
 
+      <!-- Load Generation Actions -->
+      <div class="card full-card action-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h2 class="card-title">Load Simulation Actions</h2>
+        </div>
+        <div class="action-buttons" style="display: flex; gap: 1rem; padding: 1.5rem;">
+          <button class="btn btn-primary" onclick="placeRandomOrder()">
+            <span class="btn-icon">🛒</span> Place Random Order
+          </button>
+          <button class="btn btn-danger" onclick="generateHeavyLoad()">
+            <span class="btn-icon">🔥</span> Simulate CPU Load
+          </button>
+        </div>
+        <div id="action-toast" class="toast hidden" style="padding: 0 1.5rem 1.5rem; font-size: 0.9rem;"></div>
+      </div>
+
       <!-- Stat cards -->
       <div class="stats-grid">
         <div class="stat-card" id="card-employees">
