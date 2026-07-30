@@ -49,48 +49,6 @@ app.get("/api/stats", async (req, res) => {
   }
 });
 
-// ── Employees ────────────────────────────────────────────────────────────────
-app.get("/api/employees", async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      "SELECT * FROM employees ORDER BY id ASC"
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── Create Employee ──────────────────────────────────────────────────────────
-app.post("/api/employees", async (req, res) => {
-  try {
-    const { name, department, role, salary } = req.body;
-    if (!name || !department || !role || !salary) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-    const { rows } = await pool.query(
-      "INSERT INTO employees (name, department, role, salary) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, department, role, parseFloat(salary)]
-    );
-    res.json({ status: "success", employee: rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// ── Delete Employee ──────────────────────────────────────────────────────────
-app.delete("/api/employees/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { rowCount } = await pool.query("DELETE FROM employees WHERE id = $1", [id]);
-    if (rowCount === 0) {
-      return res.status(404).json({ error: "Employee not found" });
-    }
-    res.json({ status: "success" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // ── Products ─────────────────────────────────────────────────────────────────
 app.get("/api/products", async (req, res) => {
@@ -127,20 +85,6 @@ app.get("/api/orders", async (req, res) => {
   }
 });
 
-// ── Department breakdown ─────────────────────────────────────────────────────
-app.get("/api/departments", async (req, res) => {
-  try {
-    const { rows } = await pool.query(`
-      SELECT department, COUNT(*) AS count
-      FROM employees
-      GROUP BY department
-      ORDER BY count DESC
-    `);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // ── Heavy CPU Load (For tracing/testing) ─────────────────────────────────────
 app.get("/api/heavy", (req, res) => {
@@ -157,9 +101,16 @@ app.get("/api/heavy", (req, res) => {
 // ── Create Random Order (For simulating writes) ──────────────────────────────
 app.post("/api/orders", async (req, res) => {
   try {
-    const empRes = await pool.query("SELECT id FROM employees WHERE status = 'active' ORDER BY RANDOM() LIMIT 1");
-    if (empRes.rows.length === 0) return res.status(400).json({ error: "No active employees found" });
-    const employeeId = empRes.rows[0].id;
+    // 🔥 Make HTTP call to employee-service for distributed trace!
+    const empResHTTP = await fetch("http://employee-service:3000/api/employees");
+    if (!empResHTTP.ok) throw new Error("Failed to fetch employees from employee-service");
+    const employees = await empResHTTP.json();
+    const activeEmployees = employees.filter(e => e.status === 'active');
+    if (activeEmployees.length === 0) return res.status(400).json({ error: "No active employees found" });
+    
+    // Pick random employee
+    const randomEmp = activeEmployees[Math.floor(Math.random() * activeEmployees.length)];
+    const employeeId = randomEmp.id;
 
     const prodRes = await pool.query("SELECT id, price FROM products ORDER BY RANDOM() LIMIT 1");
     if (prodRes.rows.length === 0) return res.status(400).json({ error: "No products found" });

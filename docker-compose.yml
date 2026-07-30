@@ -20,11 +20,11 @@ services:
       timeout: 5s
       retries: 5
 
-  backend:
+  employee-service:
     build:
-      context: ./backend
+      context: ./employee-service
       dockerfile: Dockerfile
-    container_name: node_backend
+    container_name: employee_service
     restart: unless-stopped
     environment:
       DB_HOST: postgres
@@ -45,7 +45,39 @@ services:
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
       OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-backend
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  order-service:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    container_name: order_service
+    restart: unless-stopped
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: appdb
+      DB_USER: appuser
+      DB_PASSWORD: apppassword
+      PORT: 3001
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_TRACES_SAMPLER: xray
+      OTEL_TRACES_SAMPLER_ARG: endpoint=http://cloudwatch-agent:2000
+      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
+      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,7 +102,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - employee-service
+      - order-service
       - frontend
     networks:
       - app_network
