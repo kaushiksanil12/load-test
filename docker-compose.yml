@@ -20,6 +20,15 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis_cache
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - app_network
+
   employee-service:
     build:
       context: ./employee-service
@@ -110,9 +119,12 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
       OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service
+      REDIS_URL: redis://redis:6379
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - app_network
 
@@ -162,6 +174,7 @@ services:
       - order-service
       - product-service
       - notification-service
+      - redis
       - frontend
     networks:
       - app_network

@@ -1,6 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
+const redis = require("redis");
 
 const app = express();
 app.use(cors());
@@ -14,6 +15,13 @@ const pool = new Pool({
   user: process.env.DB_USER || "appuser",
   password: process.env.DB_PASSWORD || "apppassword",
 });
+
+// Redis connection
+const redisClient = redis.createClient({
+  url: process.env.REDIS_URL || "redis://localhost:6379"
+});
+redisClient.on("error", (err) => console.log("Redis Client Error", err));
+redisClient.connect().then(() => console.log("✅ Connected to Redis")).catch(console.error);
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", async (req, res) => {
@@ -32,9 +40,18 @@ app.get("/api/health", async (req, res) => {
 // ── Products ─────────────────────────────────────────────────────────────────
 app.get("/api/products", async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      "SELECT * FROM products ORDER BY id ASC"
-    );
+    const cachedProducts = await redisClient.get("products");
+    if (cachedProducts) {
+      console.log("[Cache Hit] Returning products from Redis");
+      return res.json(JSON.parse(cachedProducts));
+    }
+
+    console.log("[Cache Miss] Fetching products from Postgres");
+    const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
+    
+    // Store in Redis with an expiration of 60 seconds
+    await redisClient.setEx("products", 60, JSON.stringify(rows));
+
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -44,9 +61,22 @@ app.get("/api/products", async (req, res) => {
 // ── Random Product (For Order Service) ───────────────────────────────────────
 app.get("/api/products/random", async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT id, price FROM products ORDER BY RANDOM() LIMIT 1");
-    if (rows.length === 0) return res.status(404).json({ error: "No products found" });
-    res.json(rows[0]);
+    let products;
+    const cachedProducts = await redisClient.get("products");
+    
+    if (cachedProducts) {
+      console.log("[Cache Hit] Picking random product from Redis cache");
+      products = JSON.parse(cachedProducts);
+    } else {
+      console.log("[Cache Miss] Fetching products from Postgres for random pick");
+      const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
+      products = rows;
+      await redisClient.setEx("products", 60, JSON.stringify(rows));
+    }
+
+    if (products.length === 0) return res.status(404).json({ error: "No products found" });
+    const randomProduct = products[Math.floor(Math.random() * products.length)];
+    res.json(randomProduct);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
