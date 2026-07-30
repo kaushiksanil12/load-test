@@ -50,17 +50,6 @@ app.get("/api/stats", async (req, res) => {
 });
 
 
-// ── Products ─────────────────────────────────────────────────────────────────
-app.get("/api/products", async (req, res) => {
-  try {
-    const { rows } = await pool.query(
-      "SELECT * FROM products ORDER BY id ASC"
-    );
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // ── Orders ───────────────────────────────────────────────────────────────────
 app.get("/api/orders", async (req, res) => {
@@ -101,31 +90,48 @@ app.get("/api/heavy", (req, res) => {
 // ── Create Random Order (For simulating writes) ──────────────────────────────
 app.post("/api/orders", async (req, res) => {
   try {
-    // 🔥 Make HTTP call to employee-service for distributed trace!
+    // 1. Fetch random employee from employee-service
     const empResHTTP = await fetch("http://employee-service:3000/api/employees");
     if (!empResHTTP.ok) throw new Error("Failed to fetch employees from employee-service");
     const employees = await empResHTTP.json();
     const activeEmployees = employees.filter(e => e.status === 'active');
     if (activeEmployees.length === 0) return res.status(400).json({ error: "No active employees found" });
-    
-    // Pick random employee
     const randomEmp = activeEmployees[Math.floor(Math.random() * activeEmployees.length)];
     const employeeId = randomEmp.id;
 
-    const prodRes = await pool.query("SELECT id, price FROM products ORDER BY RANDOM() LIMIT 1");
-    if (prodRes.rows.length === 0) return res.status(400).json({ error: "No products found" });
-    const productId = prodRes.rows[0].id;
-    const price = parseFloat(prodRes.rows[0].price);
+    // 2. Fetch random product from product-service
+    const prodResHTTP = await fetch("http://product-service:3002/api/products/random");
+    if (!prodResHTTP.ok) throw new Error("Failed to fetch product from product-service");
+    const product = await prodResHTTP.json();
+    const productId = product.id;
+    const price = parseFloat(product.price);
 
     const quantity = Math.floor(Math.random() * 5) + 1;
     const totalAmount = (price * quantity).toFixed(2);
 
+    // 3. Save order to database
     const insertRes = await pool.query(
       "INSERT INTO orders (employee_id, product_id, quantity, total_amount) VALUES ($1, $2, $3, $4) RETURNING *",
       [employeeId, productId, quantity, totalAmount]
     );
+    const order = insertRes.rows[0];
 
-    res.json({ status: "success", order: insertRes.rows[0] });
+    // 4. Send notification via notification-service
+    try {
+      await fetch("http://notification-service:3003/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          orderId: order.id,
+          employeeId: employeeId,
+          totalAmount: totalAmount
+        })
+      });
+    } catch (notifErr) {
+      console.warn("Failed to send notification, but order succeeded", notifErr);
+    }
+
+    res.json({ status: "success", order });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
