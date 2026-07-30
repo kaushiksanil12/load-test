@@ -1,7 +1,7 @@
 const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
-const redis = require("redis");
+const Redis = require("ioredis");
 
 const app = express();
 app.use(cors());
@@ -17,11 +17,9 @@ const pool = new Pool({
 });
 
 // Redis connection
-const redisClient = redis.createClient({
-  url: process.env.REDIS_URL || "redis://localhost:6379"
-});
+const redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
-redisClient.connect().then(() => console.log("✅ Connected to Redis")).catch(console.error);
+redisClient.on("connect", () => console.log("✅ Connected to Redis"));
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", async (req, res) => {
@@ -50,7 +48,7 @@ app.get("/api/products", async (req, res) => {
     const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
     
     // Store in Redis with an expiration of 60 seconds
-    await redisClient.setEx("products", 60, JSON.stringify(rows));
+    await redisClient.setex("products", 60, JSON.stringify(rows));
 
     res.json(rows);
   } catch (err) {
@@ -71,7 +69,7 @@ app.get("/api/products/random", async (req, res) => {
       console.log("[Cache Miss] Fetching products from Postgres for random pick");
       const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
       products = rows;
-      await redisClient.setEx("products", 60, JSON.stringify(rows));
+      await redisClient.setex("products", 60, JSON.stringify(rows));
     }
 
     if (products.length === 0) return res.status(404).json({ error: "No products found" });
