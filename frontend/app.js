@@ -1,6 +1,33 @@
 /* ─── API base (nginx proxy routes /api → backend) ─────────────────────── */
 const API = "/api";
 
+import { AwsRum } from 'aws-rum-web';
+
+try {
+  const config = {
+    sessionSampleRate: 1 ,
+    endpoint: "https://dataplane.rum.eu-north-1.amazonaws.com" ,
+    telemetries: ["performance","errors","http"] ,
+    allowCookies: true ,
+    enableXRay: false ,
+    signing: true // If you have a public resource policy and wish to send unsigned requests please set this to false
+  };
+
+  const APPLICATION_ID = 'f9d49313-e403-433d-9c24-186bedca6477';
+  const APPLICATION_VERSION = '1.0.0';
+  const APPLICATION_REGION = 'eu-north-1';
+
+  const awsRum = new AwsRum(
+    APPLICATION_ID,
+    APPLICATION_VERSION,
+    APPLICATION_REGION,
+    config
+  );
+} catch (error) {
+  // Ignore errors thrown during CloudWatch RUM web client initialization
+  console.warn("CloudWatch RUM init error", error);
+}
+
 /* ─── State ─────────────────────────────────────────────────────────────── */
 let currentTab = "overview";
 let allEmployees = [], allProducts = [], allOrders = [];
@@ -301,3 +328,14 @@ async function deleteEmployee(id) {
     showToast(`Failed to delete employee: ${err.message}`, "error");
   }
 }
+
+// ── Attach to global window for ESBuild bundler ─────────────────────────
+window.switchTab = switchTab;
+window.filterTable = filterTable;
+window.refreshDashboard = refreshDashboard;
+window.placeRandomOrder = placeRandomOrder;
+window.generateHeavyLoad = generateHeavyLoad;
+window.openAddEmployeeModal = openAddEmployeeModal;
+window.closeAddEmployeeModal = closeAddEmployeeModal;
+window.submitNewEmployee = submitNewEmployee;
+window.deleteEmployee = deleteEmployee;
