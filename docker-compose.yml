@@ -55,7 +55,7 @@ services:
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service
     depends_on:
       postgres:
@@ -89,7 +89,7 @@ services:
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service
     depends_on:
       postgres:
@@ -123,7 +123,7 @@ services:
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service
       REDIS_URL: redis://redis:6379
     depends_on:
@@ -155,7 +155,7 @@ services:
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316
+      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service
     networks:
       - app_network
