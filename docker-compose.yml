@@ -192,7 +192,7 @@ services:
     container_name: cloudwatch-agent
     restart: unless-stopped
     environment:
-      - CW_CONFIG_CONTENT={"logs":{"metrics_collected":{"application_signals":{}}},"traces":{"traces_collected":{"application_signals":{},"xray":{"bind_address":"0.0.0.0:2000"},"otlp":{"grpc_endpoint":"0.0.0.0:4317","http_endpoint":"0.0.0.0:4316"}}}}
+      - CW_CONFIG_CONTENT={"logs":{"metrics_collected":{"application_signals":{"enabled":true}}},"traces":{"traces_collected":{"application_signals":{"enabled":true},"xray":{"bind_address":"0.0.0.0:2000"},"otlp":{"grpc_endpoint":"0.0.0.0:4317","http_endpoint":"0.0.0.0:4316"}}}}
     networks:
       - app_network
 
