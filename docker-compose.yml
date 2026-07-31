@@ -12,6 +12,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
     healthcheck:
@@ -26,6 +32,12 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -60,6 +72,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -94,6 +112,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -131,6 +155,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -157,6 +187,12 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
       OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: eu-north-1
+        awslogs-group: /aws/application-signals/backend-services
+        awslogs-create-group: "true"
     networks:
       - app_network
 
