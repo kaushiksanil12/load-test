@@ -61,8 +61,8 @@ services:
       OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_TRACES_SAMPLER_ARG: endpoint=http://cloudwatch-agent:2000
+      OTEL_TRACES_SAMPLER: traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0.01
       OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
@@ -102,8 +102,8 @@ services:
       OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_TRACES_SAMPLER_ARG: endpoint=http://cloudwatch-agent:2000
+      OTEL_TRACES_SAMPLER: traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0.01
       OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
@@ -143,8 +143,8 @@ services:
       OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_TRACES_SAMPLER_ARG: endpoint=http://cloudwatch-agent:2000
+      OTEL_TRACES_SAMPLER: traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0.01
       OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
@@ -182,8 +182,8 @@ services:
       OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_TRACES_SAMPLER_ARG: endpoint=http://cloudwatch-agent:2000
+      OTEL_TRACES_SAMPLER: traceidratio
+      OTEL_TRACES_SAMPLER_ARG: 0.01
       OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
       OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
