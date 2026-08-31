@@ -1,5 +1,8 @@
 const express = require("express");
 const cors = require("cors");
+const pino = require("pino");
+
+const logger = pino();
 
 const app = express();
 app.use(cors());
@@ -18,7 +21,7 @@ app.post("/api/notifications", async (req, res) => {
     // Simulate sending an email with a delay
     await new Promise(resolve => setTimeout(resolve, 200));
 
-    console.log(`[Notification Service] 📧 Sent order confirmation email for order #${orderId}`);
+    logger.info(`[Notification Service] 📧 Sent order confirmation email for order #${orderId}`);
 
     res.json({ status: "success", message: "Email sent" });
   } catch (err) {
@@ -28,5 +31,5 @@ app.post("/api/notifications", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Notification Service running on port ${PORT}`);
+  logger.info(`✅ Notification Service running on port ${PORT}`);
 });
