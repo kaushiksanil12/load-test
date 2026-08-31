@@ -15,7 +15,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/postgres
         awslogs-create-group: "true"
     networks:
@@ -35,7 +35,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/redis
         awslogs-create-group: "true"
     networks:
@@ -75,7 +75,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/boostr-employee-service
         awslogs-create-group: "true"
     networks:
@@ -115,7 +115,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/boostr-order-service
         awslogs-create-group: "true"
     networks:
@@ -158,7 +158,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/boostr-product-service
         awslogs-create-group: "true"
     networks:
@@ -190,7 +190,7 @@ services:
     logging:
       driver: awslogs
       options:
-        awslogs-region: eu-north-1
+        awslogs-region: us-east-1
         awslogs-group: /aws/application-signals/boostr-notification-service
         awslogs-create-group: "true"
     networks:
