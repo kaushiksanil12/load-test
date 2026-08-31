@@ -2,7 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const pino = require("pino");
 
-const logger = pino();
+const logger = pino({
+  formatters: {
+    log(obj) {
+      if (obj.trace_id && !obj.trace_id.startsWith("1-")) {
+        obj.trace_id = `1-${obj.trace_id.substring(0, 8)}-${obj.trace_id.substring(8)}`;
+      }
+      return obj;
+    }
+  }
+});
 
 const app = express();
 app.use(cors());
