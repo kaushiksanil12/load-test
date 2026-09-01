@@ -2,7 +2,18 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const axios = require("axios");
+const pino = require("pino");
 
+const logger = pino({
+  formatters: {
+    log(obj) {
+      if (obj.trace_id && !obj.trace_id.startsWith("1-")) {
+        obj.trace_id = `1-${obj.trace_id.substring(0, 8)}-${obj.trace_id.substring(8)}`;
+      }
+      return obj;
+    }
+  }
+});
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -123,7 +134,7 @@ app.post("/api/orders", async (req, res) => {
         totalAmount: totalAmount
       });
     } catch (notifErr) {
-      console.warn("Failed to send notification, but order succeeded", notifErr);
+      logger.warn({ err: notifErr }, "Failed to send notification, but order succeeded");
     }
 
     res.json({ status: "success", order });
@@ -134,5 +145,5 @@ app.post("/api/orders", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
+  logger.info(`✅ Backend running on port ${PORT}`);
 });

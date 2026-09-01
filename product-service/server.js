@@ -2,7 +2,18 @@ const express = require("express");
 const { Pool } = require("pg");
 const cors = require("cors");
 const Redis = require("ioredis");
+const pino = require("pino");
 
+const logger = pino({
+  formatters: {
+    log(obj) {
+      if (obj.trace_id && !obj.trace_id.startsWith("1-")) {
+        obj.trace_id = `1-${obj.trace_id.substring(0, 8)}-${obj.trace_id.substring(8)}`;
+      }
+      return obj;
+    }
+  }
+});
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -18,8 +29,8 @@ const pool = new Pool({
 
 // Redis connection
 const redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-redisClient.on("error", (err) => console.log("Redis Client Error", err));
-redisClient.on("connect", () => console.log("✅ Connected to Redis"));
+redisClient.on("error", (err) => logger.error({ err }, "Redis Client Error"));
+redisClient.on("connect", () => logger.info("✅ Connected to Redis"));
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", async (req, res) => {
@@ -40,11 +51,11 @@ app.get("/api/products", async (req, res) => {
   try {
     const cachedProducts = await redisClient.get("products");
     if (cachedProducts) {
-      console.log("[Cache Hit] Returning products from Redis");
+      logger.info("[Cache Hit] Returning products from Redis");
       return res.json(JSON.parse(cachedProducts));
     }
 
-    console.log("[Cache Miss] Fetching products from Postgres");
+    logger.info("[Cache Miss] Fetching products from Postgres");
     const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
     
     // Store in Redis with an expiration of 60 seconds
@@ -63,10 +74,10 @@ app.get("/api/products/random", async (req, res) => {
     const cachedProducts = await redisClient.get("products");
     
     if (cachedProducts) {
-      console.log("[Cache Hit] Picking random product from Redis cache");
+      logger.info("[Cache Hit] Picking random product from Redis cache");
       products = JSON.parse(cachedProducts);
     } else {
-      console.log("[Cache Miss] Fetching products from Postgres for random pick");
+      logger.info("[Cache Miss] Fetching products from Postgres for random pick");
       const { rows } = await pool.query("SELECT * FROM products ORDER BY id ASC");
       products = rows;
       await redisClient.setex("products", 60, JSON.stringify(rows));
@@ -82,5 +93,5 @@ app.get("/api/products/random", async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Product Service running on port ${PORT}`);
+  logger.info(`✅ Product Service running on port ${PORT}`);
 });
