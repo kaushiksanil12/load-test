@@ -12,12 +12,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/postgres
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/postgres
+    #     awslogs-create-group: "true"
     networks:
       - app_network
     healthcheck:
@@ -32,12 +32,12 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/redis
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/redis
+    #     awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -48,36 +48,45 @@ services:
     container_name: employee_service
     restart: unless-stopped
     environment:
-      AWS_EC2_METADATA_DISABLED: "true"
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: appdb
       DB_USER: appuser
       DB_PASSWORD: apppassword
       PORT: 3000
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: otlp
-      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
-      OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
-      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service,aws.log.group.names=/aws/application-signals/boostr-employee-service
+      # ── Elastic APM Configuration ─────────────────────────────────────
+      ELASTIC_APM_SERVICE_NAME: boostr-employee-service
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
+      ELASTIC_APM_ACTIVE: "true"
+      ELASTIC_APM_LOG_LEVEL: info
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service
+      OTEL_PROPAGATORS: tracecontext,b3,b3multi
+      # ── AWS Tracing & Application Signals (commented out) ─────────────
+      # AWS_EC2_METADATA_DISABLED: "true"
+      # OTEL_METRICS_EXPORTER: none
+      # OTEL_LOGS_EXPORTER: otlp
+      # OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      # OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
+      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      # OTEL_TRACES_SAMPLER: always_on
+      # OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
+      # OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      # OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service,aws.log.group.names=/aws/application-signals/boostr-employee-service
     depends_on:
       postgres:
         condition: service_healthy
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/boostr-employee-service
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/boostr-employee-service
+    #     awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -88,36 +97,45 @@ services:
     container_name: order_service
     restart: unless-stopped
     environment:
-      AWS_EC2_METADATA_DISABLED: "true"
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: appdb
       DB_USER: appuser
       DB_PASSWORD: apppassword
       PORT: 3001
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: otlp
-      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
-      OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
-      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service,aws.log.group.names=/aws/application-signals/boostr-order-service
+      # ── Elastic APM Configuration ─────────────────────────────────────
+      ELASTIC_APM_SERVICE_NAME: boostr-order-service
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
+      ELASTIC_APM_ACTIVE: "true"
+      ELASTIC_APM_LOG_LEVEL: info
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service
+      OTEL_PROPAGATORS: tracecontext,b3,b3multi
+      # ── AWS Tracing & Application Signals (commented out) ─────────────
+      # AWS_EC2_METADATA_DISABLED: "true"
+      # OTEL_METRICS_EXPORTER: none
+      # OTEL_LOGS_EXPORTER: otlp
+      # OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      # OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
+      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      # OTEL_TRACES_SAMPLER: always_on
+      # OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
+      # OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      # OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service,aws.log.group.names=/aws/application-signals/boostr-order-service
     depends_on:
       postgres:
         condition: service_healthy
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/boostr-order-service
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/boostr-order-service
+    #     awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -128,39 +146,48 @@ services:
     container_name: product_service
     restart: unless-stopped
     environment:
-      AWS_EC2_METADATA_DISABLED: "true"
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: appdb
       DB_USER: appuser
       DB_PASSWORD: apppassword
       PORT: 3002
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: otlp
-      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
-      OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
-      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service,aws.log.group.names=/aws/application-signals/boostr-product-service
       REDIS_URL: redis://redis:6379
+      # ── Elastic APM Configuration ─────────────────────────────────────
+      ELASTIC_APM_SERVICE_NAME: boostr-product-service
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
+      ELASTIC_APM_ACTIVE: "true"
+      ELASTIC_APM_LOG_LEVEL: info
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service
+      OTEL_PROPAGATORS: tracecontext,b3,b3multi
+      # ── AWS Tracing & Application Signals (commented out) ─────────────
+      # AWS_EC2_METADATA_DISABLED: "true"
+      # OTEL_METRICS_EXPORTER: none
+      # OTEL_LOGS_EXPORTER: otlp
+      # OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      # OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
+      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      # OTEL_TRACES_SAMPLER: always_on
+      # OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
+      # OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      # OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service,aws.log.group.names=/aws/application-signals/boostr-product-service
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/boostr-product-service
-        awslogs-create-group: "true"
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/boostr-product-service
+    #     awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -171,28 +198,37 @@ services:
     container_name: notification_service
     restart: unless-stopped
     environment:
-      AWS_EC2_METADATA_DISABLED: "true"
       PORT: 3003
-      OTEL_METRICS_EXPORTER: none
-      OTEL_LOGS_EXPORTER: otlp
-      OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
-      OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
-      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
-      OTEL_PROPAGATORS: xray,tracecontext,b3,b3multi
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
-      OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
-      OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
-      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service,aws.log.group.names=/aws/application-signals/boostr-notification-service
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: us-east-1
-        awslogs-group: /aws/application-signals/boostr-notification-service
-        awslogs-create-group: "true"
+      # ── Elastic APM Configuration ─────────────────────────────────────
+      ELASTIC_APM_SERVICE_NAME: boostr-notification-service
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
+      ELASTIC_APM_ACTIVE: "true"
+      ELASTIC_APM_LOG_LEVEL: info
+      OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service
+      OTEL_PROPAGATORS: tracecontext,b3,b3multi
+      # ── AWS Tracing & Application Signals (commented out) ─────────────
+      # AWS_EC2_METADATA_DISABLED: "true"
+      # OTEL_METRICS_EXPORTER: none
+      # OTEL_LOGS_EXPORTER: otlp
+      # OTEL_AWS_APPLICATION_SIGNALS_ENABLED: "true"
+      # OTEL_AWS_SERVICE_EVENTS_ENABLED: "true"
+      # OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      # OTEL_TRACES_SAMPLER: always_on
+      # OTEL_AWS_APPLICATION_SIGNALS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://cloudwatch-agent:4316/v1/traces
+      # OTEL_EXPORTER_OTLP_LOGS_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://cloudwatch-agent:4316/v1/metrics
+      # OTEL_EXPORTER_OTLP_ENDPOINT: http://cloudwatch-agent:4316
+      # OTEL_AWS_SERVICE_EVENTS_EXPORTER_ENDPOINT: http://cloudwatch-agent:4316/v1/logs
+      # OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service,aws.log.group.names=/aws/application-signals/boostr-notification-service
+    # logging:
+    #   driver: awslogs
+    #   options:
+    #     awslogs-region: us-east-1
+    #     awslogs-group: /aws/application-signals/boostr-notification-service
+    #     awslogs-create-group: "true"
     networks:
       - app_network
 
@@ -223,14 +259,49 @@ services:
     networks:
       - app_network
 
-  cloudwatch-agent:
-    image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
-    container_name: cloudwatch-agent
+  # ── Continuous Traffic Generator (sends requests across all services for ELK & APM) ──
+  load-generator:
+    image: curlimages/curl:latest
+    container_name: load_generator
     restart: unless-stopped
-    environment:
-      - CW_CONFIG_CONTENT={"logs":{"metrics_collected":{"application_signals":{"enabled":true}}},"traces":{"traces_collected":{"application_signals":{"enabled":true},"xray":{"bind_address":"0.0.0.0:2000"},"otlp":{"grpc_endpoint":"0.0.0.0:4317","http_endpoint":"0.0.0.0:4316"}}}}
+    depends_on:
+      - nginx
     networks:
       - app_network
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "🚀 Continuous Load Generator started. Sending transactions to ELK/APM..."
+        sleep 5
+        while true; do
+          # 1. Standard GET queries
+          curl -s -o /dev/null -w "%%{http_code} GET /api/employees\n" http://nginx/api/employees || true
+          sleep 0.8
+          curl -s -o /dev/null -w "%%{http_code} GET /api/products\n" http://nginx/api/products || true
+          sleep 0.8
+          curl -s -o /dev/null -w "%%{http_code} GET /api/orders\n" http://nginx/api/orders || true
+          sleep 0.8
+          curl -s -o /dev/null -w "%%{http_code} GET /api/stats\n" http://nginx/api/stats || true
+          sleep 0.8
+          curl -s -o /dev/null -w "%%{http_code} GET /api/departments\n" http://nginx/api/departments || true
+          sleep 0.8
+          # 2. Multi-tier order creation (order-service -> employee -> product -> notification)
+          curl -s -X POST -o /dev/null -w "%%{http_code} POST /api/orders\n" http://nginx/api/orders || true
+          sleep 0.8
+          # 3. CPU spike
+          curl -s -o /dev/null -w "%%{http_code} GET /api/heavy\n" http://nginx/api/heavy || true
+          sleep 1
+        done
+
+  # ── AWS CloudWatch Agent (commented out for ELK / Elastic APM) ─────
+  # cloudwatch-agent:
+  #   image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
+  #   container_name: cloudwatch-agent
+  #   restart: unless-stopped
+  #   environment:
+  #     - CW_CONFIG_CONTENT={"logs":{"metrics_collected":{"application_signals":{"enabled":true}}},"traces":{"traces_collected":{"application_signals":{"enabled":true},"xray":{"bind_address":"0.0.0.0:2000"},"otlp":{"grpc_endpoint":"0.0.0.0:4317","http_endpoint":"0.0.0.0:4316"}}}}
+  #   networks:
+  #     - app_network
 
 volumes:
   pg_data:

@@ -1,5 +1,5 @@
-/* ─── AWS CloudWatch RUM ────────────────────────────────────────────────── */
-import './rum.js';
+/* ─── AWS CloudWatch RUM (commented out for ELK / Elastic APM) ──────────── */
+// import './rum.js';
 
 
 /* ─── API base (nginx proxy routes /api → backend) ─────────────────────── */
