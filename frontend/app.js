@@ -68,14 +68,14 @@ async function apiFetch(path, options = {}) {
 /* ─── Load Overview ─────────────────────────────────────────────────────── */
 async function loadOverview() {
   try {
-    const [stats, depts, orders] = await Promise.all([
+    const [statsRes, deptsRes, ordersRes] = await Promise.allSettled([
       apiFetch("/stats"),
       apiFetch("/departments"),
       apiFetch("/orders"),
     ]);
-    renderStats(stats);
-    renderDepartments(depts);
-    renderRecentOrders(orders.slice(0, 5));
+    if (statsRes.status === "fulfilled") renderStats(statsRes.value);
+    if (deptsRes.status === "fulfilled") renderDepartments(deptsRes.value);
+    if (ordersRes.status === "fulfilled") renderRecentOrders(ordersRes.value.slice(0, 5));
   } catch (e) {
     console.error("Overview error:", e);
   }
