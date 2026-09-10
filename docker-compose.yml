@@ -56,11 +56,14 @@ services:
       PORT: 3000
       # ── Elastic APM Configuration ─────────────────────────────────────
       ELASTIC_APM_SERVICE_NAME: boostr-employee-service
-      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-https://elasticsearch:9200}
+      ELASTIC_APM_API_KEY: ${ELASTIC_APM_API_KEY:-VVRqeGlxQUJRdFM4cHhDOHFUaF86UmNVek05a3dkYlUyNHB4OHc0bk0wZw==}
       ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_VERIFY_SERVER_CERT: ${ELASTIC_APM_VERIFY_SERVER_CERT:-false}
       ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
       ELASTIC_APM_ACTIVE: "true"
       ELASTIC_APM_LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-employee-service
       OTEL_PROPAGATORS: tracecontext,b3,b3multi
       # ── AWS Tracing & Application Signals (commented out) ─────────────
@@ -87,8 +90,11 @@ services:
     #     awslogs-region: us-east-1
     #     awslogs-group: /aws/application-signals/boostr-employee-service
     #     awslogs-create-group: "true"
+    extra_hosts:
+      - "elasticsearch:host-gateway"
     networks:
       - app_network
+      - elk_default
 
   order-service:
     build:
@@ -105,11 +111,14 @@ services:
       PORT: 3001
       # ── Elastic APM Configuration ─────────────────────────────────────
       ELASTIC_APM_SERVICE_NAME: boostr-order-service
-      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-https://elasticsearch:9200}
+      ELASTIC_APM_API_KEY: ${ELASTIC_APM_API_KEY:-VVRqeGlxQUJRdFM4cHhDOHFUaF86UmNVek05a3dkYlUyNHB4OHc0bk0wZw==}
       ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_VERIFY_SERVER_CERT: ${ELASTIC_APM_VERIFY_SERVER_CERT:-false}
       ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
       ELASTIC_APM_ACTIVE: "true"
       ELASTIC_APM_LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-order-service
       OTEL_PROPAGATORS: tracecontext,b3,b3multi
       # ── AWS Tracing & Application Signals (commented out) ─────────────
@@ -136,8 +145,11 @@ services:
     #     awslogs-region: us-east-1
     #     awslogs-group: /aws/application-signals/boostr-order-service
     #     awslogs-create-group: "true"
+    extra_hosts:
+      - "elasticsearch:host-gateway"
     networks:
       - app_network
+      - elk_default
 
   product-service:
     build:
@@ -155,11 +167,14 @@ services:
       REDIS_URL: redis://redis:6379
       # ── Elastic APM Configuration ─────────────────────────────────────
       ELASTIC_APM_SERVICE_NAME: boostr-product-service
-      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-https://elasticsearch:9200}
+      ELASTIC_APM_API_KEY: ${ELASTIC_APM_API_KEY:-VVRqeGlxQUJRdFM4cHhDOHFUaF86UmNVek05a3dkYlUyNHB4OHc0bk0wZw==}
       ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_VERIFY_SERVER_CERT: ${ELASTIC_APM_VERIFY_SERVER_CERT:-false}
       ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
       ELASTIC_APM_ACTIVE: "true"
       ELASTIC_APM_LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-product-service
       OTEL_PROPAGATORS: tracecontext,b3,b3multi
       # ── AWS Tracing & Application Signals (commented out) ─────────────
@@ -188,8 +203,11 @@ services:
     #     awslogs-region: us-east-1
     #     awslogs-group: /aws/application-signals/boostr-product-service
     #     awslogs-create-group: "true"
+    extra_hosts:
+      - "elasticsearch:host-gateway"
     networks:
       - app_network
+      - elk_default
 
   notification-service:
     build:
@@ -201,11 +219,14 @@ services:
       PORT: 3003
       # ── Elastic APM Configuration ─────────────────────────────────────
       ELASTIC_APM_SERVICE_NAME: boostr-notification-service
-      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-http://host.docker.internal:8200}
+      ELASTIC_APM_SERVER_URL: ${ELASTIC_APM_SERVER_URL:-https://elasticsearch:9200}
+      ELASTIC_APM_API_KEY: ${ELASTIC_APM_API_KEY:-VVRqeGlxQUJRdFM4cHhDOHFUaF86UmNVek05a3dkYlUyNHB4OHc0bk0wZw==}
       ELASTIC_APM_SECRET_TOKEN: ${ELASTIC_APM_SECRET_TOKEN:-}
+      ELASTIC_APM_VERIFY_SERVER_CERT: ${ELASTIC_APM_VERIFY_SERVER_CERT:-false}
       ELASTIC_APM_ENVIRONMENT: ${ELASTIC_APM_ENVIRONMENT:-development}
       ELASTIC_APM_ACTIVE: "true"
       ELASTIC_APM_LOG_LEVEL: info
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       OTEL_RESOURCE_ATTRIBUTES: service.name=boostr-notification-service
       OTEL_PROPAGATORS: tracecontext,b3,b3multi
       # ── AWS Tracing & Application Signals (commented out) ─────────────
@@ -229,8 +250,11 @@ services:
     #     awslogs-region: us-east-1
     #     awslogs-group: /aws/application-signals/boostr-notification-service
     #     awslogs-create-group: "true"
+    extra_hosts:
+      - "elasticsearch:host-gateway"
     networks:
       - app_network
+      - elk_default
 
   frontend:
     build:
@@ -309,3 +333,6 @@ volumes:
 networks:
   app_network:
     driver: bridge
+  elk_default:
+    external: true
+    name: elk_default
