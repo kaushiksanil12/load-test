@@ -73,6 +73,9 @@ const pool = new Pool({
   user: process.env.DB_USER || "appuser",
   password: process.env.DB_PASSWORD || "apppassword",
 });
+pool.on("error", (err) => {
+  logger.error({ err }, "[Postgres] Unexpected idle client error in order-service pool");
+});
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", async (req, res) => {

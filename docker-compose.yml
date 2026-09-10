@@ -91,6 +91,7 @@ services:
     #     awslogs-group: /aws/application-signals/boostr-employee-service
     #     awslogs-create-group: "true"
     extra_hosts:
+      - "host.docker.internal:host-gateway"
       - "elasticsearch:host-gateway"
     networks:
       - app_network
@@ -146,6 +147,7 @@ services:
     #     awslogs-group: /aws/application-signals/boostr-order-service
     #     awslogs-create-group: "true"
     extra_hosts:
+      - "host.docker.internal:host-gateway"
       - "elasticsearch:host-gateway"
     networks:
       - app_network
@@ -204,6 +206,7 @@ services:
     #     awslogs-group: /aws/application-signals/boostr-product-service
     #     awslogs-create-group: "true"
     extra_hosts:
+      - "host.docker.internal:host-gateway"
       - "elasticsearch:host-gateway"
     networks:
       - app_network
@@ -251,6 +254,7 @@ services:
     #     awslogs-group: /aws/application-signals/boostr-notification-service
     #     awslogs-create-group: "true"
     extra_hosts:
+      - "host.docker.internal:host-gateway"
       - "elasticsearch:host-gateway"
     networks:
       - app_network

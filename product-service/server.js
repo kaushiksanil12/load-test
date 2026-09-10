@@ -73,6 +73,9 @@ const pool = new Pool({
   user: process.env.DB_USER || "appuser",
   password: process.env.DB_PASSWORD || "apppassword",
 });
+pool.on("error", (err) => {
+  logger.error({ err }, "[Postgres] Unexpected idle client error in product-service pool");
+});
 
 // Redis connection
 const redisClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");

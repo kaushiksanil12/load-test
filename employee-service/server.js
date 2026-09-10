@@ -72,6 +72,9 @@ const pool = new Pool({
   user: process.env.DB_USER || "appuser",
   password: process.env.DB_PASSWORD || "apppassword",
 });
+pool.on("error", (err) => {
+  logger.error({ err }, "[Postgres] Unexpected idle client error in employee-service pool");
+});
 
 // ── Health Check ────────────────────────────────────────────────────────────
 app.get("/api/health", async (req, res) => {
@@ -154,7 +157,7 @@ app.post("/api/employees", async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
     const { rows } = await pool.query(
-      "INSERT INTO employees (name, department, role, salary) VALUES ($1, $2, $3, $4) RETURNING *",
+      "INSERT INTO employees (name, department, role, salary, joined_at) VALUES ($1, $2, $3, $4, CURRENT_DATE) RETURNING *",
       [name, department, role, parseFloat(salary)]
     );
     logger.info({ employee_id: rows[0].id, name: rows[0].name }, "[Employees] Created new employee");
