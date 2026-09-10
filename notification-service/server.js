@@ -28,15 +28,6 @@ const logger = pino({
       }
     }
     return traceData;
-  },
-  formatters: {
-    log(obj) {
-      // AWS X-Ray format (commented out for ELK / Elastic APM):
-      // if (obj.trace_id && !obj.trace_id.startsWith("1-")) {
-      //   obj.trace_id = `1-${obj.trace_id.substring(0, 8)}-${obj.trace_id.substring(8)}`;
-      // }
-      return obj;
-    }
   }
 });
 
